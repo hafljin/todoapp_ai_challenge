@@ -27,11 +27,9 @@ const AnimatedTouchableOpacity = Animated.createAnimatedComponent(TouchableOpaci
 export default function TaskItem({ task, onToggleComplete, onDelete }: TaskItemProps) {
   const scale = useSharedValue(1);
   const checkboxScale = useSharedValue(task.isCompleted ? 1 : 0.8);
-  const opacity = useSharedValue(task.isCompleted ? 0.6 : 1);
 
   const animatedContainerStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
-    opacity: opacity.value,
   }));
 
   const animatedCheckboxStyle = useAnimatedStyle(() => ({
@@ -49,8 +47,6 @@ export default function TaskItem({ task, onToggleComplete, onDelete }: TaskItemP
       checkboxScale.value = withSpring(task.isCompleted ? 0.8 : 1);
     });
     
-    opacity.value = withTiming(task.isCompleted ? 1 : 0.6, { duration: 200 });
-    
     onToggleComplete(task.id);
   };
 
@@ -60,25 +56,29 @@ export default function TaskItem({ task, onToggleComplete, onDelete }: TaskItemP
   };
 
   return (
-    <AnimatedTouchableOpacity
+    <Animated.View
       entering={FadeIn.duration(300)}
       exiting={FadeOut.duration(200)}
       style={[styles.container, animatedContainerStyle]}
-      onPress={handleToggleComplete}
-      activeOpacity={0.7}
     >
-      <Animated.View style={[styles.checkbox, animatedCheckboxStyle]}>
-        {task.isCompleted && (
-          <Check color="#FFFFFF" size={16} strokeWidth={3} />
-        )}
-      </Animated.View>
-      
-      <Text style={[
-        styles.title,
-        task.isCompleted && styles.completedTitle
-      ]}>
-        {task.title}
-      </Text>
+      <TouchableOpacity
+        style={styles.touchableArea}
+        onPress={handleToggleComplete}
+        activeOpacity={0.7}
+      >
+        <Animated.View style={[styles.checkbox, animatedCheckboxStyle]}>
+          {task.isCompleted && (
+            <Check color="#FFFFFF" size={16} strokeWidth={3} />
+          )}
+        </Animated.View>
+        
+        <Text style={[
+          styles.title,
+          task.isCompleted && styles.completedTitle
+        ]}>
+          {task.title}
+        </Text>
+      </TouchableOpacity>
       
       <TouchableOpacity
         style={styles.deleteButton}
@@ -87,7 +87,7 @@ export default function TaskItem({ task, onToggleComplete, onDelete }: TaskItemP
       >
         <Trash2 color="#EF4444" size={20} />
       </TouchableOpacity>
-    </AnimatedTouchableOpacity>
+    </Animated.View>
   );
 }
 
@@ -108,6 +108,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.08,
     shadowRadius: 4,
     elevation: 3,
+  },
+  touchableArea: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   checkbox: {
     width: 24,

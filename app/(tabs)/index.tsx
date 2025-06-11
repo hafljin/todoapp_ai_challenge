@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, StyleSheet, SafeAreaView } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
 import TaskInput from '@/components/TaskInput';
 import TaskItem, { Task } from '@/components/TaskItem';
 import { CircleCheck as CheckCircle } from 'lucide-react-native';
@@ -17,6 +18,13 @@ export default function TasksScreen() {
     loadTasks();
   }, []);
 
+  // Reload tasks when screen comes into focus (e.g., after clearing tasks in settings)
+  useFocusEffect(
+    React.useCallback(() => {
+      loadTasks();
+    }, [])
+  );
+
   // Save tasks to storage whenever tasks change
   useEffect(() => {
     if (!isLoading) {
@@ -29,9 +37,12 @@ export default function TasksScreen() {
       const storedTasks = await AsyncStorage.getItem(STORAGE_KEY);
       if (storedTasks) {
         setTasks(JSON.parse(storedTasks));
+      } else {
+        setTasks([]);
       }
     } catch (error) {
       console.error('Error loading tasks:', error);
+      setTasks([]);
     } finally {
       setIsLoading(false);
     }
